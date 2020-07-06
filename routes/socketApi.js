@@ -3,12 +3,12 @@ let socketApi = {};
 
 socketApi.io = io;
 
-let users = {};
+let users = [];
 
 io.on('connection', function (socket) {
   socket.on('initializeUser', data => {
-    users[data.username] = socket.id;
-    socket.emit('onlineUsers', users);
+    users.push({ username: data.username, socketID: socket.id })
+    socket.broadcast.emit('onlineUsers', users);
   });
 
   socket.on('requestOnlineUsers', data => {
@@ -16,9 +16,11 @@ io.on('connection', function (socket) {
   });
 
   socket.on('sendMessage', data => {
-    console.log(users[data.to])
-    console.log(users[data.from])
-    io.to(users[data.to]).emit('receiveMessage', data)
+    users.forEach(el => {
+      if (el.username === data.to) {
+        return io.to(el.socketID).emit('receiveMessage', data)
+      }
+    })
   });
 
 });
