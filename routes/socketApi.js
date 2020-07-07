@@ -23,10 +23,14 @@ io.on('connection', function (socket) {
     })
   });
 
-});
+  socket.on('disconnect', data => {
+    users = users.filter(el => el.socketID !== socket.id)
+  });
+
+})
 
 socketApi.sendNotification = () => {
   io.sockets.emit('hello', { msg: 'Hello World!' });
 };
 
-module.exports = socketApi;
+module.exports = socketApi
